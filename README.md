@@ -1,4 +1,4 @@
-# 🎨 Krea 2 Style Navigator
+# 🎨 Krea 2 Moodbaoards
 
 A web application designed to easily navigate a curated catalog of styles and mood boards optimized for **Krea 2**.
 
