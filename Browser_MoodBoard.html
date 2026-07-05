@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bibliothèque de Moodboards Krea2</title>
+    <style>
+        :root {
+            --bg: #121212;
+            --surface: #1e1e1e;
+            --primary: #3b82f6;
+            --text: #f3f4f6;
+            --text-muted: #9ca3af;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        header {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        input[type="file"] {
+            background: var(--surface);
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            color: var(--text);
+            cursor: pointer;
+        }
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            background: var(--surface);
+            color: var(--text);
+            font-size: 16px;
+        }
+        input[type="text"]:focus {
+            outline: 2px solid var(--primary);
+            border-color: transparent;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: var(--surface);
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #2a2a2a;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+        }
+        .card img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+        }
+        .card-content {
+            padding: 15px;
+        }
+        .card-title {
+            margin: 0 0 10px 0;
+            font-size: 1.1em;
+            line-height: 1.3;
+        }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .tag {
+            background: #374151;
+            color: #d1d5db;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+        }
+        /* Fenêtre Modale */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 100;
+        }
+        .modal-content {
+            background: var(--surface);
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            border: 1px solid #333;
+        }
+        .close-btn {
+            position: absolute;
+            top: 15px; right: 20px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 28px;
+            cursor: pointer;
+        }
+        .close-btn:hover { color: #fff; }
+        .modal-img {
+            width: 100%;
+            max-height: 450px;
+            object-fit: contain;
+            background: #000;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .section-title {
+            color: var(--primary);
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 25px;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .modal-text {
+            line-height: 1.6;
+            color: #d1d5db;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <input type="file" id="fileInput" accept=".json" title="Charger le fichier JSON">
+        <input type="text" id="searchInput" placeholder="Rechercher par titre, mot-clé ou ambiance...">
+    </header>
+    
+    <div id="gallery" class="grid">
+        <!-- Les cartes seront injectées ici -->
+    </div>
+</div>
+
+<div id="modal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="close-btn" id="closeModal">&times;</button>
+        <img id="modalImg" class="modal-img" src="" alt="">
+        <h2 id="modalTitle" style="margin-top:0;"></h2>
+        <div class="tags" id="modalTags"></div>
+        
+        <div class="section-title">Profil Visuel (Taste Profile)</div>
+        <p class="modal-text" id="modalProfile"></p>
+        
+        <div class="section-title">Prompt Positif</div>
+        <p class="modal-text" id="modalPrompt"></p>
+        
+        <div class="section-title">Prompt Négatif</div>
+        <p class="modal-text" id="modalNegative"></p>
+        
+        <div class="section-title">Axes de Style</div>
+        <div class="tags" id="modalAxes" style="margin-top: 10px;"></div>
+    </div>
+</div>
+
+<script>
+    let moodboards = [];
+    const fileInput = document.getElementById('fileInput');
+    const searchInput = document.getElementById('searchInput');
+    const gallery = document.getElementById('gallery');
+    const modal = document.getElementById('modal');
+
+    // Chargement local du fichier
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const data = JSON.parse(event.target.result);
+                moodboards = data.moodboards || [];
+                renderGallery(moodboards);
+            } catch (error) {
+                alert("Erreur: Le fichier JSON est invalide.");
+            }
+        };
+        reader.readAsText(file);
+    });
+
+    // Moteur de recherche en temps réel
+    searchInput.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const filtered = moodboards.filter(mb => {
+            const titleMatch = mb.title?.toLowerCase().includes(term);
+            const keywordsMatch = mb.keywords?.some(kw => kw.toLowerCase().includes(term));
+            const profileMatch = mb.taste_profile?.toLowerCase().includes(term);
+            return titleMatch || keywordsMatch || profileMatch;
+        });
+        renderGallery(filtered);
+    });
+
+    // Affichage des cartes
+    function renderGallery(items) {
+        gallery.innerHTML = '';
+        if(items.length === 0) {
+            gallery.innerHTML = '<p style="color: #9ca3af;">Aucun moodboard trouvé.</p>';
+            return;
+        }
+
+        items.forEach(mb => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.onclick = () => openModal(mb);
+            
+            // On affiche seulement les 3 premiers mots-clés sur la carte
+            const keywordsHtml = (mb.keywords || []).slice(0, 3)
+                .map(kw => `<span class="tag">${kw}</span>`).join('');
+            
+            card.innerHTML = `
+                <img src="${mb.primary_image_url}" alt="${mb.title}" loading="lazy">
+                <div class="card-content">
+                    <h3 class="card-title">${mb.title}</h3>
+                    <div class="tags">${keywordsHtml}</div>
+                </div>
+            `;
+            gallery.appendChild(card);
+        });
+    }
+
+    // Gestion de la modale détaillée
+    function openModal(mb) {
+        document.getElementById('modalImg').src = mb.primary_image_url || '';
+        document.getElementById('modalTitle').textContent = mb.title || 'Sans titre';
+        
+        document.getElementById('modalTags').innerHTML = (mb.keywords || [])
+            .map(kw => `<span class="tag">${kw}</span>`).join('');
+            
+        document.getElementById('modalProfile').textContent = mb.taste_profile || 'Non spécifié';
+        
+        const qwen = mb.qwen_guidance || {};
+        document.getElementById('modalPrompt').textContent = qwen.prompt_guidance || 'Non spécifié';
+        document.getElementById('modalNegative').textContent = qwen.negative_guidance || 'Non spécifié';
+        
+        document.getElementById('modalAxes').innerHTML = (qwen.style_axes || [])
+            .map(axis => `<span class="tag">${axis}</span>`).join('');
+            
+        modal.style.display = 'flex';
+    }
+
+    // Fermeture de la modale
+    document.getElementById('closeModal').onclick = () => modal.style.display = 'none';
+    modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+    document.addEventListener('keydown', (e) => { if (e.key === "Escape") modal.style.display = 'none'; });
+
+</script>
+</body>
+</html>
