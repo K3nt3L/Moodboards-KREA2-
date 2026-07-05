@@ -1,4 +1,4 @@
-# 🎨 Krea 2 Moodbaoards
+# 🎨 Krea 2 Moodboard Explorer
 
 A web application designed to easily navigate a curated catalog of styles and mood boards optimized for **Krea 2**.
 
