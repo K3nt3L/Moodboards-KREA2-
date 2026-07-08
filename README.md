@@ -16,3 +16,5 @@ This application utilizes a style catalog originally compiled by:
 👤 **Original Author:** Andro-Meta
 
 This tool is dedicated to visualizing and leveraging the data provided by the project above.
+
+![screenshot](screenshot_Krea_moodboard_explorer.png)
