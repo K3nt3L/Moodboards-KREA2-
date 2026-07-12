@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Krea2 Moodboards</title>
+    <style>
+        :root {
+            --bg: #121212;
+            --surface: #1e1e1e;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --text: #f3f4f6;
+            --text-muted: #9ca3af;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        header {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        select {
+            background: var(--surface);
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            color: var(--text);
+            cursor: pointer;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        .custom-file-upload {
+            background: var(--surface);
+            padding: 11px 16px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            color: var(--text);
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        .custom-file-upload:hover {
+            background: #2a2a2a;
+        }
+
+        .search-wrapper {
+            position: relative;
+            flex-grow: 1;
+            display: flex;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            padding-right: 40px; 
+            border-radius: 6px;
+            border: 1px solid #333;
+            background: var(--surface);
+            color: var(--text);
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        input[type="text"]:focus {
+            outline: 2px solid var(--primary);
+            border-color: transparent;
+        }
+        .clear-search-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+            display: none; 
+            padding: 0;
+            line-height: 1;
+        }
+        .clear-search-btn:hover {
+            color: var(--text);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: var(--surface);
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #2a2a2a;
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+        }
+        .card img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+        }
+        .card-content {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .card-title {
+            margin: 0 0 10px 0;
+            font-size: 1.1em;
+            line-height: 1.3;
+        }
+        
+        .title-word {
+            display: inline-block;
+            cursor: pointer;
+            transition: color 0.15s;
+        }
+        .title-word:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .tag {
+            background: #374151;
+            color: #d1d5db;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            transition: all 0.2s;
+        }
+        .tag.selectable {
+            cursor: pointer;
+            user-select: none;
+            border: 1px solid transparent;
+        }
+        .tag.selectable:hover {
+            background: #4b5563;
+        }
+        .tag.selectable.selected {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: var(--primary);
+            color: #fff;
+        }
+        
+        /* Liens URL */
+        .source-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.85em;
+            word-break: break-all;
+            transition: color 0.2s;
+            margin-top: auto; /* Pousse le lien vers le bas de la carte */
+        }
+        .source-link:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
+        }
+        .modal-source-link {
+            display: inline-block;
+            margin-bottom: 15px;
+            font-size: 1em;
+        }
+
+        /* Fenêtre Modale */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 100;
+        }
+        .modal-content {
+            background: var(--surface);
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 1200px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            border: 1px solid #333;
+        }
+        .close-btn {
+            position: absolute;
+            top: 15px; right: 20px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 28px;
+            cursor: pointer;
+        }
+        .close-btn:hover { color: #fff; }
+        .modal-img {
+            width: 100%;
+            max-height: 500px;
+            object-fit: contain;
+            background: #000;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 25px;
+            margin-bottom: 8px;
+        }
+        .section-title {
+            color: var(--primary);
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+        .modal-text {
+            line-height: 1.6;
+            color: #d1d5db;
+            margin: 0;
+            background: rgba(0,0,0,0.2);
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #2a2a2a;
+        }
+        
+        .copy-btn {
+            background: #2a2a2a;
+            color: var(--text);
+            border: 1px solid #444;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75em;
+            transition: all 0.2s;
+        }
+        .copy-btn:hover {
+            background: #3a3a3a;
+        }
+        .copy-btn.success {
+            background: #059669;
+            border-color: #059669;
+            color: white;
+        }
+        .kw-actions {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <select id="langSelect">
+            <option value="fr">Français</option>
+            <option value="en">English</option>
+            <option value="zh">中文</option>
+        </select>
+        
+        <label for="fileInput" class="custom-file-upload" data-i18n="chooseFile"></label>
+        <input type="file" id="fileInput" accept=".json">
+        
+        <div class="search-wrapper">
+            <input type="text" id="searchInput" data-i18n-placeholder="search">
+            <button id="clearSearchBtn" class="clear-search-btn" aria-label="Clear search">&times;</button>
+        </div>
+    </header>
+    
+    <div id="gallery" class="grid"></div>
+</div>
+
+<div id="modal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="close-btn" id="closeModal">&times;</button>
+        <img id="modalImg" class="modal-img" src="" alt="">
+        
+        <h2 id="modalTitle" style="margin-top:0; margin-bottom: 5px;"></h2>
+        <a id="modalUrlLink" class="source-link modal-source-link" href="#" target="_blank"></a>
+        
+        <div class="section-header">
+            <div class="section-title" data-i18n="keywordsTitle"></div>
+            <div class="kw-actions">
+                <button class="copy-btn" id="btnCopySelectedKw" data-i18n="copySelectedKw"></button>
+                <button class="copy-btn" id="btnCopyAllKwList" data-i18n="copyAllKwList"></button>
+            </div>
+        </div>
+        <div class="tags" id="modalTags" style="margin-bottom: 10px;"></div>
+        
+        <div class="section-header">
+            <div class="section-title" data-i18n="tasteProfile"></div>
+            <button class="copy-btn" onclick="copyText('modalProfile', this)" data-i18n="copy"></button>
+        </div>
+        <p class="modal-text" id="modalProfile"></p>
+        
+        <div class="section-header">
+            <div class="section-title" data-i18n="positivePrompt"></div>
+            <button class="copy-btn" onclick="copyText('modalPrompt', this)" data-i18n="copy"></button>
+        </div>
+        <p class="modal-text" id="modalPrompt"></p>
+        
+        <div class="section-header">
+            <div class="section-title" data-i18n="negativePrompt"></div>
+            <button class="copy-btn" onclick="copyText('modalNegative', this)" data-i18n="copy"></button>
+        </div>
+        <p class="modal-text" id="modalNegative"></p>
+        
+        <div class="section-header">
+            <div class="section-title" data-i18n="styleAxes"></div>
+            <button class="copy-btn" onclick="copyText('modalAxes', this)" data-i18n="copy"></button>
+        </div>
+        <p class="modal-text" id="modalAxes"></p>
+    </div>
+</div>
+
+<script>
+    const i18n = {
+        fr: {
+            search: "Rechercher par titre, mot-clé ou ambiance...",
+            noResults: "Aucun moodboard trouvé.",
+            tasteProfile: "Profil Visuel",
+            positivePrompt: "Prompt Positif",
+            negativePrompt: "Prompt Négatif",
+            styleAxes: "Axes de Style",
+            copy: "Copier",
+            copied: "Copié !",
+            keywordsTitle: "Mots-clés (cliquez pour sélectionner)",
+            copySelectedKw: "Copier la sélection (,)",
+            copyAllKwList: "Copier tout (Liste)",
+            notSpecified: "Non spécifié",
+            chooseFile: "Choisir un fichier JSON"
+        },
+        en: {
+            search: "Search by title, keyword or mood...",
+            noResults: "No moodboards found.",
+            tasteProfile: "Taste Profile",
+            positivePrompt: "Positive Prompt",
+            negativePrompt: "Negative Prompt",
+            styleAxes: "Style Axes",
+            copy: "Copy",
+            copied: "Copied!",
+            keywordsTitle: "Keywords (click to select)",
+            copySelectedKw: "Copy selected (,)",
+            copyAllKwList: "Copy all (List)",
+            notSpecified: "Not specified",
+            chooseFile: "Choose JSON file"
+        },
+        zh: {
+            search: "按标题、关键词或氛围搜索...",
+            noResults: "未找到情绪板。",
+            tasteProfile: "视觉档案",
+            positivePrompt: "正向提示词",
+            negativePrompt: "反向提示词",
+            styleAxes: "风格轴",
+            copy: "复制",
+            copied: "已复制！",
+            keywordsTitle: "关键词 (点击选择)",
+            copySelectedKw: "复制选中项 (,)",
+            copyAllKwList: "复制全部 (列表)",
+            notSpecified: "未指定",
+            chooseFile: "选择 JSON 文件"
+        }
+    };
+
+    let moodboards = [];
+    let currentKeywords = [];
+    let currentLang = 'fr';
+
+    const fileInput = document.getElementById('fileInput');
+    const searchInput = document.getElementById('searchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const gallery = document.getElementById('gallery');
+    const modal = document.getElementById('modal');
+    const langSelect = document.getElementById('langSelect');
+
+    function updateLanguage() {
+        currentLang = langSelect.value;
+        const texts = i18n[currentLang];
+        
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            el.textContent = texts[el.getAttribute('data-i18n')];
+        });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            el.placeholder = texts[el.getAttribute('data-i18n-placeholder')];
+        });
+        
+        renderGallery(getFilteredMoodboards());
+    }
+    langSelect.addEventListener('change', updateLanguage);
+
+    async function copyToClipboard(text, btnElement) {
+        if (!text) return;
+        try {
+            await navigator.clipboard.writeText(text);
+            const originalText = btnElement.textContent;
+            btnElement.textContent = i18n[currentLang].copied;
+            btnElement.classList.add('success');
+            setTimeout(() => {
+                btnElement.textContent = originalText;
+                btnElement.classList.remove('success');
+            }, 2000);
+        } catch (err) {
+            console.error('Failed to copy', err);
+        }
+    }
+
+    window.copyText = function(elementId, btnElement) {
+        const text = document.getElementById(elementId).textContent;
+        if(text !== i18n[currentLang].notSpecified) {
+            copyToClipboard(text, btnElement);
+        }
+    };
+
+    document.getElementById('btnCopySelectedKw').addEventListener('click', function() {
+        const selectedElements = document.querySelectorAll('#modalTags .tag.selected');
+        const selectedTexts = Array.from(selectedElements).map(el => el.textContent);
+        if(selectedTexts.length > 0) {
+            copyToClipboard(selectedTexts.join(', '), this);
+        }
+    });
+
+    document.getElementById('btnCopyAllKwList').addEventListener('click', function() {
+        if(currentKeywords.length > 0) {
+            copyToClipboard(currentKeywords.join('\n'), this);
+        }
+    });
+
+    window.filterByWord = function(word) {
+        searchInput.value = word;
+        clearSearchBtn.style.display = 'block';
+        renderGallery(getFilteredMoodboards());
+    };
+
+    function buildClickableTitleHtml(titleText) {
+        if (!titleText) return '';
+        const words = titleText.split(/\s+/);
+        return words.map(word => {
+            const cleanWord = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+            const escapedWord = cleanWord.replace(/"/g, '&quot;').replace(/'/g, "\\'");
+            return `<span class="title-word" onclick="event.stopPropagation(); filterByWord('${escapedWord}')">${word}</span>`;
+        }).join(' '); 
+    }
+
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const data = JSON.parse(event.target.result);
+                moodboards = data.moodboards || [];
+                renderGallery(moodboards);
+            } catch (error) {
+                alert("Erreur: Le fichier JSON est invalide.");
+            }
+        };
+        reader.readAsText(file);
+    });
+
+    function getFilteredMoodboards() {
+        const term = searchInput.value.toLowerCase();
+        return moodboards.filter(mb => {
+            const titleMatch = mb.title?.toLowerCase().includes(term);
+            const keywordsMatch = mb.keywords?.some(kw => kw.toLowerCase().includes(term));
+            const profileMatch = mb.taste_profile?.toLowerCase().includes(term);
+            const slugMatch = mb.slug?.toLowerCase().includes(term);
+            return titleMatch || keywordsMatch || profileMatch || slugMatch;
+        });
+    }
+
+    searchInput.addEventListener('input', () => {
+        clearSearchBtn.style.display = searchInput.value.length > 0 ? 'block' : 'none';
+        renderGallery(getFilteredMoodboards());
+    });
+
+    clearSearchBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        clearSearchBtn.style.display = 'none';
+        renderGallery(getFilteredMoodboards());
+        searchInput.focus();
+    });
+
+    function renderGallery(items) {
+        gallery.innerHTML = '';
+        if(items.length === 0) {
+            gallery.innerHTML = `<p style="color: #9ca3af;">${i18n[currentLang].noResults}</p>`;
+            return;
+        }
+
+        items.forEach(mb => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.onclick = () => openModal(mb);
+            
+            const keywordsHtml = (mb.keywords || []).slice(0, 3)
+                .map(kw => `<span class="tag">${kw}</span>`).join('');
+            
+            const titleHtml = buildClickableTitleHtml(mb.title);
+            
+            // Génération du lien si url et slug existent
+            const linkHtml = (mb.url && mb.slug) 
+                ? `<a href="${mb.url}" class="source-link" target="_blank" onclick="event.stopPropagation();">${mb.slug}</a>` 
+                : '';
+
+            card.innerHTML = `
+                <img src="${mb.primary_image_url}" alt="${mb.title}" loading="lazy">
+                <div class="card-content">
+                    <h3 class="card-title">${titleHtml}</h3>
+                    <div class="tags">${keywordsHtml}</div>
+                    ${linkHtml}
+                </div>
+            `;
+            gallery.appendChild(card);
+        });
+    }
+
+    function openModal(mb) {
+        const notSpec = i18n[currentLang].notSpecified;
+        document.getElementById('modalImg').src = mb.primary_image_url || '';
+        
+        // Gestion du Titre
+        const modalTitleEl = document.getElementById('modalTitle');
+        modalTitleEl.innerHTML = '';
+        if (mb.title) {
+            const words = mb.title.split(/\s+/);
+            words.forEach(word => {
+                const span = document.createElement('span');
+                span.className = 'title-word';
+                span.textContent = word; 
+                const cleanWord = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+                span.onclick = function() {
+                    modal.style.display = 'none';
+                    filterByWord(cleanWord);
+                };
+                modalTitleEl.appendChild(span);
+                modalTitleEl.appendChild(document.createTextNode(' ')); 
+            });
+        } else {
+            modalTitleEl.textContent = notSpec;
+        }
+
+        // Gestion du lien URL
+        const modalUrlEl = document.getElementById('modalUrlLink');
+        if (mb.url && mb.slug) {
+            modalUrlEl.href = mb.url;
+            modalUrlEl.textContent = mb.slug;
+            modalUrlEl.style.display = 'inline-block';
+        } else {
+            modalUrlEl.style.display = 'none';
+        }
+        
+        // Gestion des mots-clés
+        const tagsContainer = document.getElementById('modalTags');
+        tagsContainer.innerHTML = '';
+        currentKeywords = mb.keywords || [];
+        
+        currentKeywords.forEach(kw => {
+            const span = document.createElement('span');
+            span.className = 'tag selectable';
+            span.textContent = kw;
+            span.onclick = function() {
+                this.classList.toggle('selected');
+            };
+            tagsContainer.appendChild(span);
+        });
+            
+        document.getElementById('modalProfile').textContent = mb.taste_profile || notSpec;
+        
+        const qwen = mb.qwen_guidance || {};
+        document.getElementById('modalPrompt').textContent = qwen.prompt_guidance || notSpec;
+        document.getElementById('modalNegative').textContent = qwen.negative_guidance || notSpec;
+        
+        const modalAxesEl = document.getElementById('modalAxes');
+        modalAxesEl.innerHTML = '';
+        
+        if (qwen.style_axes && qwen.style_axes.length > 0) {
+            const axesText = qwen.style_axes.join(', ');
+            const words = axesText.split(/\s+/);
+            
+            words.forEach(word => {
+                const span = document.createElement('span');
+                span.className = 'title-word'; 
+                span.textContent = word; 
+                
+                const cleanWord = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+                
+                span.onclick = function() {
+                    modal.style.display = 'none'; 
+                    filterByWord(cleanWord);      
+                };
+                
+                modalAxesEl.appendChild(span);
+                modalAxesEl.appendChild(document.createTextNode(' ')); 
+            });
+        } else {
+            modalAxesEl.textContent = notSpec;
+        }
+
+        modal.style.display = 'flex'; 
+    }
+
+    document.getElementById('closeModal').onclick = () => modal.style.display = 'none';
+    modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+    document.addEventListener('keydown', (e) => { if (e.key === "Escape") modal.style.display = 'none'; });
+
+    updateLanguage();
+</script>
+</body>
+</html>
