@@ -39,7 +39,7 @@ This tool is dedicated to visualizing and leveraging the data provided by the pr
 
 -----------------
 
-# 🎨 Explorateurde Moodboard Krea2
+# 🎨 Explorateur de Moodboards Krea2
 
 Une application web conçue pour naviguer facilement dans un catalogue soigneusement sélectionné de styles et de moodboards optimisés pour **Krea 2**.
 
