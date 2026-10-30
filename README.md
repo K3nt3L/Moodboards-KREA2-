@@ -65,6 +65,7 @@ Cet outil est dédié à la visualisation et à l'exploitation des données four
 
 ## User Guide / Mode d'emploi
 ENG : Download the latest version (version 1.4) along with the krea_moodboards.json file. Open the web application and specify the path to the JSON file.
+
 FR : téléchargez la dernière version (version 1.4) et le fichier krea_moodboards.json. Ouvrez l'application Web et définissez le chemin vers le fichier JSON.
 
 用户指南：请下载最新版本（1.4版）以及krea_moodboards.json文件。打开网页应用后，设置该JSON文件的路径。
